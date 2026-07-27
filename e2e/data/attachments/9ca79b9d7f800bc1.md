@@ -1,0 +1,111 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: autenticacao/login.spec.ts >> Autenticação via Authentik >> login com usuário multi-vínculo redireciona para seleção de condomínio
+- Location: tests/autenticacao/login.spec.ts:5:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e7]:
+  - main "Authentication form" [ref=e8]:
+    - img "authentik Logo" [ref=e10]
+    - heading "Redirect URI Error" [level=1] [ref=e12]
+    - generic [ref=e14]:
+      - paragraph [ref=e15]: The request fails due to a missing, invalid, or mismatching redirection URI (redirect_uri).
+      - link "Go home" [ref=e17] [cursor=pointer]:
+        - /url: /
+  - contentinfo "Site footer" [ref=e18]:
+    - generic "Flow links" [ref=e19]:
+      - list [ref=e20]:
+        - listitem [ref=e21]: Powered by authentik
+```
+
+# Test source
+
+```ts
+  1  | import { test, expect } from '@playwright/test';
+  2  | import { epic, feature, story, severity, Severity, tag } from 'allure-js-commons';
+  3  | 
+  4  | test.describe('Autenticação via Authentik', () => {
+  5  |   test('login com usuário multi-vínculo redireciona para seleção de condomínio', async ({ page }) => {
+  6  |     await epic('Autenticação');
+  7  |     await feature('Login via Authentik (BFF-Session)');
+  8  |     await story('Login com múltiplos vínculos ativos leva à seleção de condomínio');
+  9  |     await severity(Severity.CRITICAL);
+  10 |     await tag('smoke');
+  11 | 
+  12 |     const senha = process.env.AUTHENTIK_QA_ADMIN_PASSWORD;
+  13 |     if (!senha) {
+  14 |       throw new Error(
+  15 |         'AUTHENTIK_QA_ADMIN_PASSWORD não definido. Configure no .env local ou como secret de CI.',
+  16 |       );
+  17 |     }
+  18 | 
+  19 |     await test.step('Acessar a tela de login do shell', async () => {
+  20 |       await page.goto('/login');
+  21 |       await expect(page.getByRole('link', { name: 'Entrar no Sistema' })).toBeVisible();
+  22 |     });
+  23 | 
+  24 |     await test.step('Clicar em "Entrar no Sistema" e ser redirecionado ao Authentik', async () => {
+  25 |       // Porta do host onde o Authentik expõe o front-channel do OAuth2 -- 9000 em dev local
+  26 |       // (docker-compose.override.yml de integra-condo-inf-authentik); em CI (e2e-completo) é
+  27 |       // 19000, porque o runner compartilhado já roda a instância -hom do Authentik em 9000
+  28 |       // (ver AUTHENTIK_BASE_URL no ci.yml e TROUBLESHOOTING_SOLUTIONS.md).
+  29 |       const authentikBaseUrl = process.env.AUTHENTIK_BASE_URL ?? 'http://localhost:9000';
+  30 |       await page.getByRole('link', { name: 'Entrar no Sistema' }).click();
+> 31 |       await page.waitForURL((url) => url.href.startsWith(authentikBaseUrl) && url.href.includes('flow'));
+     |                  ^ Error: page.waitForURL: Test timeout of 30000ms exceeded.
+  32 |     });
+  33 | 
+  34 |     await test.step('Preencher usuário (qa-admin) no formulário nativo do Authentik', async () => {
+  35 |       // Seletor baseado no stage "identification" padrão do Authentik (campo uidField).
+  36 |       // VALIDAR em runtime — a UI do Authentik é de terceiro, fora deste monorepo, e pode
+  37 |       // divergir conforme customização do flow.
+  38 |       await page.locator('input[name="uidField"]').fill('qa-admin');
+  39 |       await page.getByRole('button', { name: /continuar|log ?in|next/i }).click();
+  40 |     });
+  41 | 
+  42 |     await test.step('Preencher senha e confirmar', async () => {
+  43 |       await page.locator('input[name="password"]').fill(senha);
+  44 |       await page.getByRole('button', { name: /continuar|log ?in|entrar/i }).click();
+  45 |     });
+  46 | 
+  47 |     await test.step('Validar redirect pós-login para a seleção de condomínio', async () => {
+  48 |       // qa-admin tem 4 vínculos ativos (SINDICO, CONDOMINO, COLABORADOR_INTERNO, PRESTADOR_EXTERNO)
+  49 |       // no mesmo condomínio — o guard condominioSelecionadoGuard sempre redireciona para esta tela
+  50 |       // em vez de ir direto a /sindico.
+  51 |       await page.waitForURL(/\/selecionar-condominio$/);
+  52 |       await expect(page.locator('.selecionar-condominio-page__title')).toHaveText(
+  53 |         'Escolha seu condomínio',
+  54 |       );
+  55 |       await expect(page.locator('.selecionar-condominio-page__logada-como')).toContainText(
+  56 |         'Logada como',
+  57 |       );
+  58 |     });
+  59 | 
+  60 |     await test.step('Validar que os vínculos ativos do qa-admin aparecem na lista', async () => {
+  61 |       await expect(page.locator('.selecionar-condominio-page__item')).toHaveCount(4);
+  62 |     });
+  63 |   });
+  64 | });
+  65 | 
+```
