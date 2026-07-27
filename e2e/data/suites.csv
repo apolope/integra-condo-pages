@@ -1,2 +1,2 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","31712","login com usuário multi-vínculo redireciona para seleção de condomínio","chromium","2026-07-27","broken","2026-07-27","Autenticação via Authentik","","",""
+"","33499","login com usuário multi-vínculo redireciona para seleção de condomínio","chromium","2026-07-27","broken","2026-07-27","Autenticação via Authentik","","",""
