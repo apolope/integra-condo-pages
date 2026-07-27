@@ -12,7 +12,34 @@
 # Error details
 
 ```
-Error: AUTHENTIK_QA_ADMIN_PASSWORD não definido. Configure no .env local ou como secret de CI.
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.waitForURL: Test timeout of 30000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+  navigated to "http://localhost:4200/login"
+============================================================
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e4]:
+  - banner [ref=e5]:
+    - img [ref=e7]
+    - generic [ref=e11]: Integra Condo
+  - generic [ref=e12]:
+    - heading "Bem-vindo(a) ao Integra Condo!" [level=1] [ref=e13]
+    - paragraph [ref=e14]: Você será redirecionado com segurança para o Authentik, nosso provedor de identidade, para concluir o login.
+  - generic [ref=e16]:
+    - paragraph [ref=e17]: Continue com sua conta Integra Condo
+    - link "Entrar no Sistema" [ref=e18] [cursor=pointer]:
+      - /url: /oauth2/authorization/authentik
+  - generic [ref=e19]:
+    - generic [ref=e20]: © 2026
+    - generic [ref=e21]: A3S It Solutions LTDA
 ```
 
 # Test source
@@ -31,8 +58,7 @@ Error: AUTHENTIK_QA_ADMIN_PASSWORD não definido. Configure no .env local ou com
   11 | 
   12 |     const senha = process.env.AUTHENTIK_QA_ADMIN_PASSWORD;
   13 |     if (!senha) {
-> 14 |       throw new Error(
-     |             ^ Error: AUTHENTIK_QA_ADMIN_PASSWORD não definido. Configure no .env local ou como secret de CI.
+  14 |       throw new Error(
   15 |         'AUTHENTIK_QA_ADMIN_PASSWORD não definido. Configure no .env local ou como secret de CI.',
   16 |       );
   17 |     }
@@ -44,7 +70,8 @@ Error: AUTHENTIK_QA_ADMIN_PASSWORD não definido. Configure no .env local ou com
   23 | 
   24 |     await test.step('Clicar em "Entrar no Sistema" e ser redirecionado ao Authentik', async () => {
   25 |       await page.getByRole('link', { name: 'Entrar no Sistema' }).click();
-  26 |       await page.waitForURL(/localhost:9000\/.*flow/);
+> 26 |       await page.waitForURL(/localhost:9000\/.*flow/);
+     |                  ^ Error: page.waitForURL: Test timeout of 30000ms exceeded.
   27 |     });
   28 | 
   29 |     await test.step('Preencher usuário (qa-admin) no formulário nativo do Authentik', async () => {

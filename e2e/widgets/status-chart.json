@@ -1,1 +1,1 @@
-[{"uid":"94b85ce25f8589c1","name":"login com usuário multi-vínculo redireciona para seleção de condomínio","time":{"start":1785184218733,"stop":1785184218972,"duration":239},"status":"failed","severity":"critical"}]
+[{"uid":"55d81ba5bd85875f","name":"login com usuário multi-vínculo redireciona para seleção de condomínio","time":{"start":1785184734307,"stop":1785184766019,"duration":31712},"status":"broken","severity":"critical"}]
