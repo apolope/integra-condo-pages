@@ -1,2 +1,2 @@
 "BROKEN","EPIC","FAILED","FEATURE","PASSED","SKIPPED","STORY","UNKNOWN"
-"1","Autenticação","0","Login via Authentik (BFF-Session)","0","0","Login com múltiplos vínculos ativos leva à seleção de condomínio","0"
+"0","Autenticação","0","Login via Authentik (BFF-Session)","1","0","Login com múltiplos vínculos ativos leva à seleção de condomínio","0"
